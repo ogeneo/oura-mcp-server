@@ -287,6 +287,7 @@ async function handleGetSleepSummary(args: any): Promise<string> {
     light_sleep_duration: number;
     rem_sleep_duration: number;
     awake_time: number;
+    latency: number;
   }> = {};
 
   for (const period of periodData) {
@@ -299,8 +300,10 @@ async function handleGetSleepSummary(args: any): Promise<string> {
         light_sleep_duration: 0,
         rem_sleep_duration: 0,
         awake_time: 0,
+        latency: 0,
       };
     }
+    periodsByDay[day].latency += period.latency ?? 0;
     periodsByDay[day].total_sleep_duration += period.total_sleep_duration ?? 0;
     periodsByDay[day].deep_sleep_duration += period.deep_sleep_duration ?? 0;
     periodsByDay[day].light_sleep_duration += period.light_sleep_duration ?? 0;
@@ -321,7 +324,7 @@ async function handleGetSleepSummary(args: any): Promise<string> {
       score: item.score,
       total_sleep_duration: periods.total_sleep_duration,
       efficiency: item.contributors.efficiency,
-      latency: item.contributors.latency * 60,
+      latency: periods.latency,
       deep_sleep_duration: periods.deep_sleep_duration,
       light_sleep_duration: periods.light_sleep_duration,
       rem_sleep_duration: periods.rem_sleep_duration,
