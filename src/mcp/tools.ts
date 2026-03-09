@@ -324,7 +324,7 @@ async function handleGetSleepSummary(args: any): Promise<string> {
       score: item.score,
       total_sleep_duration: periods.total_sleep_duration,
       efficiency: item.contributors.efficiency,
-      latency: periods.latency,
+      latency: Math.round(periods.latency / 60),
       deep_sleep_duration: periods.deep_sleep_duration,
       light_sleep_duration: periods.light_sleep_duration,
       rem_sleep_duration: periods.rem_sleep_duration,
