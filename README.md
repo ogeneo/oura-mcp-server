@@ -1,12 +1,14 @@
 # Oura MCP Server
 
-[![UPSTRM](https://www.upstrm.dev/api/badge/2?token=b48c2b26-7a64-4941-bc63-96289890221b)](https://www.upstrm.dev/server/2/oura-mcp-server)
 
 MCP (Model Context Protocol) server that enables AI assistants to access your Oura Ring health data through OAuth2-authenticated API calls.
 
+Built by [@meimakes](https://x.com/meimakes)
+
+
 Built for seamless integration with [Poke](https://poke.com) and other MCP-compatible clients. Deploy to Railway for production use or run locally for development.
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/Kt-3nX?referralCode=7zdyjn&utm_medium=integration&utm_source=template&utm_campaign=generic)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/YWxHvn?referralCode=a6V1Do&utm_medium=integration&utm_source=template&utm_campaign=generic)
 
 ## Features
 
@@ -58,7 +60,6 @@ openssl rand -hex 32
 
 1. Click the button below to deploy to Railway:
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/meimakes/oura-mcp-server)
 
 Or manually:
 - Go to [Railway](https://railway.app)
