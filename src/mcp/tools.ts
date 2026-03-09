@@ -273,22 +273,64 @@ async function handleGetSleepSummary(args: any): Promise<string> {
   const cached = cache.get<string>(cacheKey);
   if (cached) return cached;
 
-  const data = await getDailySleep(start_date, end_date || getTodayDate());
+  const endDate = end_date || getTodayDate();
 
-  const mapped = data.map((item) => ({
-    date: item.day,
-    score: item.score,
-    total_sleep_duration: item.total_sleep_duration ?? 0,
-efficiency: item.contributors.efficiency,
-latency: item.contributors.latency * 60,
-deep_sleep_duration: item.deep_sleep_duration ?? 0,
-light_sleep_duration: item.light_sleep_duration ?? 0,
-rem_sleep_duration: item.rem_sleep_duration ?? 0,
-awake_time: item.awake_time ?? 0,
-    restfulness: item.contributors.restfulness,
-    timing: item.contributors.timing,
-    ...(include_hrv && { hrv_balance: 0 }), // Note: HRV balance not directly available in daily sleep
-  }));
+  const [dailyData, periodData] = await Promise.all([
+    getDailySleep(start_date, endDate),
+    getSleepPeriods(start_date, endDate),
+  ]);
+
+  // Group detailed sleep periods by day, summing stage durations
+  const periodsByDay: Record<string, {
+    total_sleep_duration: number;
+    deep_sleep_duration: number;
+    light_sleep_duration: number;
+    rem_sleep_duration: number;
+    awake_time: number;
+  }> = {};
+
+  for (const period of periodData) {
+    if (period.type === 'deleted') continue;
+    const day = period.day;
+    if (!periodsByDay[day]) {
+      periodsByDay[day] = {
+        total_sleep_duration: 0,
+        deep_sleep_duration: 0,
+        light_sleep_duration: 0,
+        rem_sleep_duration: 0,
+        awake_time: 0,
+      };
+    }
+    periodsByDay[day].total_sleep_duration += period.total_sleep_duration ?? 0;
+    periodsByDay[day].deep_sleep_duration += period.deep_sleep_duration ?? 0;
+    periodsByDay[day].light_sleep_duration += period.light_sleep_duration ?? 0;
+    periodsByDay[day].rem_sleep_duration += period.rem_sleep_duration ?? 0;
+    periodsByDay[day].awake_time += period.awake_time ?? 0;
+  }
+
+  const mapped = dailyData.map((item) => {
+    const periods = periodsByDay[item.day] || {
+      total_sleep_duration: 0,
+      deep_sleep_duration: 0,
+      light_sleep_duration: 0,
+      rem_sleep_duration: 0,
+      awake_time: 0,
+    };
+    return {
+      date: item.day,
+      score: item.score,
+      total_sleep_duration: periods.total_sleep_duration,
+      efficiency: item.contributors.efficiency,
+      latency: item.contributors.latency * 60,
+      deep_sleep_duration: periods.deep_sleep_duration,
+      light_sleep_duration: periods.light_sleep_duration,
+      rem_sleep_duration: periods.rem_sleep_duration,
+      awake_time: periods.awake_time,
+      restfulness: item.contributors.restfulness,
+      timing: item.contributors.timing,
+      ...(include_hrv && { hrv_balance: 0 }),
+    };
+  });
 
   const summary = {
     average_score: mapped.reduce((acc, item) => acc + item.score, 0) / mapped.length,
